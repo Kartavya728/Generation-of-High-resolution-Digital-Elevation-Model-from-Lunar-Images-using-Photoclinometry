@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photoclinometry Web Tool</title>
+    <!-- Icon Library -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <style>
+        :root {
+            --primary-color: #0d47a1;
+            --secondary-color: #1565c0;
+            --bg-color: #f4f7fc;
+            --card-bg-color: #ffffff;
+            --text-color: #333;
+            --border-color: #dfe4ea;
+            --shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2em;
+        }
+        .container {
+            max-width: 1200px;
+            margin: auto;
+        }
+        header h1 {
+            text-align: center;
+            font-size: 2.5em;
+            color: var(--primary-color);
+            margin-bottom: 1em;
+        }
+        form {
+            width: 100%;
+        }
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2em;
+        }
+        .panel {
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 2em;
+            box-shadow: var(--shadow);
+        }
+        .panel h2 {
+            margin-top: 0;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5em;
+        }
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5em;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        .form-group label {
+            margin-bottom: 0.5em;
+            font-weight: 500;
+        }
+        .form-group input[type="number"] {
+            padding: 0.8em;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.1);
+        }
+        .btn {
+            padding: 0.8em 1.5em;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5em;
+        }
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #0a3a82;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 71, 161, 0.2);
+        }
+        .btn-secondary {
+            background-color: var(--bg-color);
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover {
+            background-color: #e9eff8;
+        }
+        .upload-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border: 2px dashed var(--border-color);
+            border-radius: 12px;
+            min-height: 250px;
+            text-align: center;
+            padding: 2em;
+            cursor: pointer;
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        .upload-area:hover {
+            border-color: var(--primary-color);
+            background-color: #fafdff;
+        }
+        .upload-area .bx {
+            font-size: 4em;
+            color: var(--secondary-color);
+        }
+        .upload-area p {
+            margin: 0.5em 0;
+            font-weight: 500;
+        }
+        .full-width-btn-container {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-top: 1.5em;
+        }
+        .section {
+            margin-top: 3em;
+            background-color: var(--card-bg-color);
+            border-radius: 12px;
+            padding: 2em;
+            box-shadow: var(--shadow);
+        }
+        .section h2 { margin-top: 0; color: var(--secondary-color); }
+        .output-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5em;
+        }
+        .output-card {
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5em;
+            text-align: center;
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        .output-card .bx { font-size: 3em; color: var(--primary-color); }
+        .landing-spot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1em;
+            background-color: #e9eff8;
+            border-radius: 8px;
+        }
+        input[type="file"] { display: none; }
+        @media (max-width: 900px) {
+            .main-grid, .form-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header><h1>Lunar Surface Reconstruction Tool</h1></header>
+
+    <form action="{{ url_for('run_sfs') }}" method="post" enctype="multipart/form-data" id="sfs-form">
+        <div class="main-grid">
+            <div class="panel">
+                <h2>Metadata</h2>
+                <div class="form-grid">
+                    <div class="form-group"><label for="sun_azimuth_deg">Sun Azimuthal Angle (°)</label><input type="number" step="any" id="sun_azimuth_deg" name="sun_azimuth_deg" value="101.55" required></div>
+                    <div class="form-group"><label for="sun_elevation_deg">Sun Elevation Angle (°)</label><input type="number" step="any" id="sun_elevation_deg" name="sun_elevation_deg" value="34.80" required></div>
+                    <div class="form-group"><label for="solar_incident_angle">Solar Incident Angle (°)</label><input type="number" step="any" id="solar_incident_angle" name="solar_incident_angle" placeholder="e.g., 55.2" disabled></div>
+                    <div class="form-group"><label for="focal_length_mm">Focal Length (mm)</label><input type="number" step="any" id="focal_length_mm" name="focal_length_mm" value="140.0" required></div>
+                    <div class="form-group"><label for="roll_angle">Roll Angle (°)</label><input type="number" step="any" id="roll_angle" name="roll_angle" placeholder="e.g., 0.1" disabled></div>
+                    <div class="form-group"><label for="pitch_angle">Pitch Angle (°)</label><input type="number" step="any" id="pitch_angle" name="pitch_angle" placeholder="e.g., -0.5" disabled></div>
+                    <div class="form-group"><label for="yaw_angle">Yaw Angle (°)</label><input type="number" step="any" id="yaw_angle" name="yaw_angle" placeholder="e.g., 2.3" disabled></div>
+                </div>
+                <div style="margin-top: 2em; text-align: center;">
+                    <label for="json_upload" class="btn btn-secondary"><i class='bx bx-upload'></i> Upload JSON File</label>
+                    <input type="file" id="json_upload" name="json_file" accept=".json">
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>Input Image</h2>
+                <label for="image_file" class="upload-area">
+                    <i class='bx bxs-cloud-upload'></i>
+                    <p>Click to browse or drag & drop</p>
+                    <span id="file-name-display" style="font-style: italic; color: #555;">No file selected</span>
+                </label>
+                <input type="file" id="image_file" name="image_file" accept="image/*" required>
+            </div>
+            
+            <div class="full-width-btn-container">
+                 <button type="submit" class="btn btn-primary" style="padding: 1em 4em; font-size: 1.2em;"><i class='bx bx-rocket'></i> Download DEM</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="section">
+        <h2>Outputs</h2>
+        <div class="output-grid">
+            <div class="output-card"><i class='bx bx-map-alt'></i><h3>DEM</h3><p>Digital Elevation Model</p></div>
+            <div class="output-card"><i class='bx bx-cube-alt'></i><h3>3D Visualization</h3><p>Interactive Surface Plot</p></div>
+            <div class="output-card"><i class='bx bxs-component'></i><h3>3D Object</h3><p>Downloadable .OBJ file</p></div>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Landing Suitability Analysis</h2>
+        <div class="landing-spot">
+            <div>
+                <p style="margin: 0; font-size: 1.2em;"><strong>Landing spot score —</strong> <span style="color: #555;">(Awaiting Rover Info)</span></p>
+                <p style="margin: 0.5em 0 0 0; color: #555;">Upload rover information to check safe landing spot</p>
+            </div>
+            <label for="rover_info" class="btn btn-secondary"><i class='bx bx-car'></i> Upload Rover Info</label>
+            <input type="file" id="rover_info" name="rover_info" accept=".json">
+        </div>
+    </div>
+</div>
+<script>
+    const imageUpload = document.getElementById('image_file');
+    const fileNameDisplay = document.getElementById('file-name-display');
+    imageUpload.onchange = () => {
+        if (imageUpload.files.length > 0) {
+            fileNameDisplay.textContent = imageUpload.files[0].name;
+        } else {
+            fileNameDisplay.textContent = 'No file selected';
+        }
+    };
+</script>
+</body>
+</html>
